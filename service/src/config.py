@@ -18,6 +18,7 @@ class NetworkingConfig(BaseModel):
     tunnels: list[InterfaceConfig] = [InterfaceConfig(name='tun0',
                                                       ip='1.2.3.4')]
 
+    dns_port: int = 5553
 
 class Config(BaseModel):
     networking: NetworkingConfig = NetworkingConfig()

@@ -23,6 +23,3 @@ def get_available_interfaces() -> list[NetworkInterface]:
                 result.append(NetworkInterface(name=iface, ip=address['addr']))
 
     return result
-
-
-print(get_available_interfaces())
