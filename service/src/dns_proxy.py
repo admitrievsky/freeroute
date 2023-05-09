@@ -1,5 +1,8 @@
 # based on https://github.com/uktrade/dns-rewrite-proxy
 
+import logging
+import socket
+import string
 from asyncio import (
     CancelledError,
     Queue,
@@ -9,12 +12,10 @@ from asyncio import (
 from enum import (
     IntEnum,
 )
-import logging
 from random import (
     choices,
 )
-import string
-import socket
+from typing import Awaitable, Callable, Any
 
 from aiodnsresolver import (
     RESPONSE,
@@ -49,7 +50,7 @@ class DnsProxyLoggerAdapter(logging.LoggerAdapter):
         return \
             ('[dnsproxy] %s' % (msg,), kwargs) if not self.extra else \
                 ('[dnsproxy:%s] %s' % (
-                ','.join(str(v) for v in self.extra.values()), msg), kwargs)
+                    ','.join(str(v) for v in self.extra.values()), msg), kwargs)
 
 
 def get_logger_adapter_default(extra):
@@ -68,7 +69,8 @@ def DnsProxy(
         get_logger_adapter=get_logger_adapter_default,
         get_resolver_logger_adapter=get_resolver_logger_adapter_default,
         get_socket=get_socket_default, num_workers=1000,
-        resolved_callback=lambda domain, ip: None
+        resolved_callback: Callable[[Any, Any], Awaitable[Any]] =
+        lambda domain, ip: None
 ):
     class ERRORS(IntEnum):
         FORMERR = 1
@@ -176,7 +178,8 @@ def DnsProxy(
         request_logger.info('Resolved to %s', ip_addresses)
         now = loop.time()
 
-        resolved_callback(name_str_lower, ip_addresses)
+        if resolved_callback is not None:
+            await resolved_callback(name_str_lower, ip_addresses)
 
         def ttl(ip_address):
             return int(max(0.0, ip_address.expires_at - now))

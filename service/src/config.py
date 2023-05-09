@@ -20,8 +20,33 @@ class NetworkingConfig(BaseModel):
 
     dns_port: int = 5553
 
+
+class DomainList(BaseModel):
+    name: str
+    interface: str
+
+    def __hash__(self):
+        return hash(self.name + self.interface)
+
+    def __eq__(self, other):
+        return self.name == other.name and self.interface == other.interface
+
+
+class ExternalDomainList(DomainList):
+    url: str
+    update_interval_hours: int
+
+
 class Config(BaseModel):
     networking: NetworkingConfig = NetworkingConfig()
+    external_domain_lists: list[ExternalDomainList] = [
+        ExternalDomainList(
+            name='antifilter',
+            url='https://antifilter.download/list/domains.lst',
+            update_interval_hours=1,
+            interface='tun0'
+        )
+    ]
 
 
 __config: Optional[Config] = None
