@@ -7,16 +7,22 @@ from pydantic import BaseModel
 
 class InterfaceConfig(BaseModel):
     name: str
-    ip: str
+    gateway_ip: str
+
+    def __hash__(self):
+        return hash(self.name + self.gateway_ip)
+
+    def __eq__(self, other):
+        return self.name == other.name and self.gateway_ip == other.gateway_ip
 
 
 class NetworkingConfig(BaseModel):
     ignore_interfaces: list[str] = ['lo']
 
     default_gateway: InterfaceConfig = InterfaceConfig(name='eth0',
-                                                       ip='192.168.1.1')
+                                                       gateway_ip='192.168.1.1')
     tunnels: list[InterfaceConfig] = [InterfaceConfig(name='tun0',
-                                                      ip='1.2.3.4')]
+                                                      gateway_ip='1.2.3.4')]
 
     dns_port: int = 5553
 
@@ -47,6 +53,7 @@ class Config(BaseModel):
             interface='tun0'
         )
     ]
+    ip_route_command: str = 'sudo ip route'
 
 
 __config: Optional[Config] = None
