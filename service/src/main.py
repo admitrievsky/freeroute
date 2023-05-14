@@ -10,7 +10,7 @@ from dns_proxy import (
     DnsProxy
 )
 from domain_lists import init_external_domain_lists, match_domain
-from ip_route import add_route, del_route, sync_ip_route_cache
+from ip_route import add_route, sync_ip_route_cache
 
 iface_name_to_config = {
     config.name: config for config in get_config().networking.tunnels
@@ -28,14 +28,14 @@ for logger_name, level in {'freeroute': 'DEBUG',
 
 async def on_resolve(domain: str, ips: list[IPv4AddressExpiresAt]):
     domain_list = match_domain(domain)
-    ips_str = [str(ip) for ip in ips]
+
     if domain_list is not None:
+        ips_str = [str(ip) for ip in ips]
         iface_config = iface_name_to_config[domain_list.interface]
-        logger.debug(f'Adding route to %s via %s', ips_str, iface_config.name)
+        logger.debug(f'Adding route to %s via %s for %s', ips_str, iface_config.name, domain)
         await add_route(iface_config, ips_str)
     else:
-        logger.debug(f'No route for %s. Removing it', domain)
-        await del_route(ips_str)
+        logger.debug(f'No route for %s. Doing nothing', domain)
 
 
 async def async_main():
