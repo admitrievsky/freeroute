@@ -53,6 +53,10 @@ class Config(BaseModel):
             interface='tun0'
         )
     ]
+    manual_domain_lists: list[DomainList] = [
+        DomainList(name='vpn', interface='tun0')
+    ]
+    manual_domain_list_save_interval_sec: int = 60
     ip_route_command: str = 'sudo ip route'
 
 

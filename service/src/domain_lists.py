@@ -4,7 +4,7 @@ from typing import Coroutine, Optional, Any, Callable
 import aiohttp
 
 from config import ExternalDomainList, get_config, DomainList
-from domain_matcher import DomainMatcher
+from domain_matchers import DomainMatcher, SerializableDomainMatcher
 from scheduled import scheduled
 
 logger = logging.getLogger('freeroute')
@@ -37,6 +37,30 @@ def init_external_domain_lists() -> list[
         return result
 
     return init()
+
+
+def init_manual_domain_lists() -> list[
+    Callable[[], Coroutine[Any, Any, Optional[Any]]]]:
+    result = []
+    for list_config in get_config().manual_domain_lists:
+        matcher = SerializableDomainMatcher(f'list_{list_config.name}.txt')
+        try:
+            logger.info(f'Loading manual list {list_config.name}')
+            matcher.load()
+        except FileNotFoundError as e:
+            logger.info(f'File {e.filename} not found, creating new one')
+            matcher.dump_empty()
+        lists[list_config] = matcher
+
+        @scheduled(get_config().manual_domain_list_save_interval_sec)
+        async def task():
+            if matcher.is_dirty():
+                logger.info(f'Saving list {list_config.name}')
+                await matcher.dump()
+
+        result.append(task)
+
+    return result
 
 
 def match_domain(domain: str) -> Optional[DomainList]:

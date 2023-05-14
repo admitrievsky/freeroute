@@ -9,7 +9,8 @@ from config import get_config
 from dns_proxy import (
     DnsProxy
 )
-from domain_lists import init_external_domain_lists, match_domain
+from domain_lists import init_external_domain_lists, match_domain, \
+    init_manual_domain_lists
 from ip_route import add_route, sync_ip_route_cache
 
 iface_name_to_config = {
@@ -32,7 +33,8 @@ async def on_resolve(domain: str, ips: list[IPv4AddressExpiresAt]):
     if domain_list is not None:
         ips_str = [str(ip) for ip in ips]
         iface_config = iface_name_to_config[domain_list.interface]
-        logger.debug(f'Adding route to %s via %s for %s', ips_str, iface_config.name, domain)
+        logger.debug(f'Adding route to %s via %s for %s', ips_str,
+                     iface_config.name, domain)
         await add_route(iface_config, ips_str)
     else:
         logger.debug(f'No route for %s. Doing nothing', domain)
@@ -47,6 +49,11 @@ async def async_main():
 
     external_domain_list_tasks = init_external_domain_lists()
     for task in external_domain_list_tasks:
+        tasks.add(
+            asyncio.create_task(task()))
+
+    manual_domain_list_tasks = init_manual_domain_lists()
+    for task in manual_domain_list_tasks:
         tasks.add(
             asyncio.create_task(task()))
 
