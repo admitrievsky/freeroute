@@ -3,6 +3,7 @@ import logging
 import re
 
 from config import get_config, InterfaceConfig
+from scheduled import scheduled
 
 logger = logging.getLogger('freeroute')
 
@@ -67,7 +68,9 @@ async def flush_cache():
     await ip_route('flush', 'cache')
 
 
-async def init_ip_route_cache():
+@scheduled(60)
+async def sync_ip_route_cache():
+    logger.info('Syncing ip route cache')
     global cache
     gateway_ips_to_iface_configs = {
         config.gateway_ip: config for config in get_config().networking.tunnels
@@ -76,14 +79,18 @@ async def init_ip_route_cache():
         config: set() for config in gateway_ips_to_iface_configs.values()
     }
 
-    routes = await get_routes()
-    for route in routes.splitlines():
+    actual_routes_by_gateway = {}
+
+    for route in (await get_routes()).splitlines():
         values = re.match(r'(\d+\.\d+\.\d+\.\d+).*via (\d+\.\d+\.\d+\.\d+)',
                           route)
         if values is None:
             continue
         ip, gateway_ip = values.groups()
+        actual_routes_by_gateway.setdefault(gateway_ip, set()).add(ip)
+
+    for gateway_ip, ips in actual_routes_by_gateway.items():
         iface_config = gateway_ips_to_iface_configs.get(gateway_ip)
         if iface_config is None:
             continue
-        cache[gateway_ips_to_iface_configs.get(gateway_ip)].add(ip)
+        cache[iface_config] = ips
