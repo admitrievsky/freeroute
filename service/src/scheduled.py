@@ -1,7 +1,5 @@
 import asyncio
-import logging
-
-logger = logging.getLogger('freeroute')
+from logger import logger
 
 
 def scheduled(interval: float):

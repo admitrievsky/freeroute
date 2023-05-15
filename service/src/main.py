@@ -1,7 +1,5 @@
 import asyncio
-import logging
 import signal
-import sys
 
 from aiodnsresolver import IPv4AddressExpiresAt
 
@@ -12,19 +10,13 @@ from dns_proxy import (
 from domain_lists import init_external_domain_lists, match_domain, \
     init_manual_domain_lists
 from ip_route import add_route, sync_ip_route_cache, del_route
+from logger import init_logging, logger
+
+init_logging()
 
 iface_name_to_config = {
     config.name: config for config in get_config().networking.tunnels
 }
-
-logger = logging.getLogger('freeroute')
-
-for logger_name, level in {'freeroute': 'DEBUG',
-                           'dnsrewriteproxy': 'ERROR'}.items():
-    logging.getLogger(logger_name).setLevel(level)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(level)
-    logging.getLogger(logger_name).addHandler(handler)
 
 
 async def on_resolve(domain: str, ips: list[IPv4AddressExpiresAt]):

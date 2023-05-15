@@ -1,9 +1,6 @@
-import logging
 from bisect import bisect, bisect_left
 
 import aiofiles as aiofiles
-
-logger = logging.getLogger('freeroute')
 
 
 class DomainMatcher:

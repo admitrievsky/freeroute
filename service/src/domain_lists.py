@@ -1,4 +1,3 @@
-import logging
 from typing import Coroutine, Optional, Any, Callable
 
 import aiohttp
@@ -6,8 +5,7 @@ import aiohttp
 from config import ExternalDomainList, get_config, DomainList
 from domain_matchers import DomainMatcher, SerializableDomainMatcher
 from scheduled import scheduled
-
-logger = logging.getLogger('freeroute')
+from logger import logger
 
 lists: dict[DomainList, DomainMatcher] = {}
 

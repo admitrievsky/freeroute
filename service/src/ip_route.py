@@ -4,8 +4,7 @@ import re
 
 from config import get_config, InterfaceConfig
 from scheduled import scheduled
-
-logger = logging.getLogger('freeroute')
+from logger import logger
 
 cache: dict[InterfaceConfig, set[str]] = {}
 

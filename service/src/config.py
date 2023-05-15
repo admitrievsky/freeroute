@@ -59,6 +59,7 @@ class Config(BaseModel):
     ]
     manual_domain_list_save_interval_sec: int = 60
     ip_route_command: str = 'sudo ip route'
+    loggers: dict[str, str] = {'freeroute': 'INFO', 'dnsrewriteproxy': 'ERROR'}
 
 
 __config: Optional[Config] = None
@@ -81,5 +82,6 @@ def get_config() -> Config:
     __config = __config or load_config()
     if __config is None:
         __config = Config()
+        print(f'Writing default config to {__config_filename}')
         write_config()
     return __config
