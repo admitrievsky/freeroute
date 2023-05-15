@@ -54,6 +54,7 @@ class Config(BaseModel):
         )
     ]
     manual_domain_lists: list[DomainList] = [
+        DomainList(name='force_default', interface='force_default'),
         DomainList(name='vpn', interface='tun0')
     ]
     manual_domain_list_save_interval_sec: int = 60

@@ -11,7 +11,7 @@ from dns_proxy import (
 )
 from domain_lists import init_external_domain_lists, match_domain, \
     init_manual_domain_lists
-from ip_route import add_route, sync_ip_route_cache
+from ip_route import add_route, sync_ip_route_cache, del_route
 
 iface_name_to_config = {
     config.name: config for config in get_config().networking.tunnels
@@ -32,6 +32,12 @@ async def on_resolve(domain: str, ips: list[IPv4AddressExpiresAt]):
 
     if domain_list is not None:
         ips_str = [str(ip) for ip in ips]
+
+        if domain_list.name == 'force_default':
+            logger.debug(f'Forcing default route to %s for %s', ips_str, domain)
+            await del_route(ips_str)
+            return
+
         iface_config = iface_name_to_config[domain_list.interface]
         logger.debug(f'Adding route to %s via %s for %s', ips_str,
                      iface_config.name, domain)
@@ -47,13 +53,13 @@ async def async_main():
     proxy_task = await start()
     tasks.add(proxy_task)
 
-    external_domain_list_tasks = init_external_domain_lists()
-    for task in external_domain_list_tasks:
+    manual_domain_list_tasks = init_manual_domain_lists()
+    for task in manual_domain_list_tasks:
         tasks.add(
             asyncio.create_task(task()))
 
-    manual_domain_list_tasks = init_manual_domain_lists()
-    for task in manual_domain_list_tasks:
+    external_domain_list_tasks = init_external_domain_lists()
+    for task in external_domain_list_tasks:
         tasks.add(
             asyncio.create_task(task()))
 
