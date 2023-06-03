@@ -42,7 +42,7 @@ event_source_handler = EventSourceHandler()
 
 async def setup_web_server():
     app = web.Application()
-    app.router.add_route('GET', '/event-log',
+    app.router.add_route('GET', '/api/event-log',
                          event_source_handler.event_source_handler)
     runner = web.AppRunner(app)
     await runner.setup()
