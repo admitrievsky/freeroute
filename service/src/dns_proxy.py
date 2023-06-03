@@ -129,7 +129,7 @@ def DnsProxy(
             try:
                 request_logger.info('Processing request')
                 response_data = await get_response_data(request_logger, resolve,
-                                                        request_data)
+                                                        request_data, addr)
                 # Sendto for non-blocking UDP sockets cannot raise a BlockingIOError
                 # https://stackoverflow.com/a/59794872/1319998
                 sock.sendto(response_data, addr)
@@ -139,7 +139,7 @@ def DnsProxy(
                 request_logger.info('Finished processing request')
                 upstream_queue.task_done()
 
-    async def get_response_data(request_logger, resolve, request_data):
+    async def get_response_data(request_logger, resolve, request_data, addr):
         # This may raise an exception, which is handled at a higher level.
         # We can't [and I suspect shouldn't try to] return an error to the
         # client, since we're not able to extract the QID, so the client won't
@@ -147,12 +147,12 @@ def DnsProxy(
         query = parse(request_data)
 
         try:
-            return pack(await proxy(request_logger, resolve, query))
+            return pack(await proxy(request_logger, resolve, query, addr))
         except Exception:
             request_logger.exception('Failed to proxy %s', query)
             return pack(error(query, ERRORS.SERVFAIL))
 
-    async def proxy(request_logger, resolve, query):
+    async def proxy(request_logger, resolve, query, addr):
         name_bytes = query.qd[0].name
         request_logger.info('Name: %s', name_bytes)
 
@@ -179,7 +179,7 @@ def DnsProxy(
         now = loop.time()
 
         if resolved_callback is not None:
-            await resolved_callback(name_str_lower, ip_addresses)
+            await resolved_callback(addr, name_str_lower, ip_addresses)
 
         def ttl(ip_address):
             return int(max(0.0, ip_address.expires_at - now))

@@ -60,6 +60,7 @@ class Config(BaseModel):
     manual_domain_list_save_interval_sec: int = 60
     ip_route_command: str = 'sudo ip route'
     loggers: dict[str, str] = {'freeroute': 'INFO', 'dnsrewriteproxy': 'ERROR'}
+    api_port: int = 8080
 
 
 __config: Optional[Config] = None

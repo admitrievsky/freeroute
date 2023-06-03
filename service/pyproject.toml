@@ -13,6 +13,7 @@ pydantic = "^1.10.7"
 aiodnsresolver = "^0.0.151"
 aiohttp = "^3.8.4"
 aiofiles = "^23.1.0"
+aiohttp-sse = "^2.1.0"
 
 
 [build-system]
