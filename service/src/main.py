@@ -25,6 +25,9 @@ async def on_resolve(addr: str, domain: str, ips: list[IPv4AddressExpiresAt]):
     domain_list = match_domain(domain)
     ips_str = [str(ip) for ip in ips]
 
+    event_logger.log_resolve_event(addr[0], domain, ips_str,
+                                   domain_list.name if domain_list else None)
+
     if domain_list is not None:
         if domain_list.name == 'force_default':
             logger.debug(f'Forcing default route to %s for %s', ips_str, domain)
@@ -37,9 +40,6 @@ async def on_resolve(addr: str, domain: str, ips: list[IPv4AddressExpiresAt]):
         await add_route(iface_config, ips_str)
     else:
         logger.debug(f'No route for %s. Doing nothing', domain)
-
-    event_logger.log_resolve_event(addr[0], domain, ips_str,
-                                   domain_list.name if domain_list else None)
 
 
 async def async_main():

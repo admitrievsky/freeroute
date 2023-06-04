@@ -40,10 +40,15 @@ class EventSourceHandler:
 event_source_handler = EventSourceHandler()
 
 
+async def domain_list_handler(request: BaseRequest):
+    return web.json_response([l.name for l in get_config().manual_domain_lists])
+
+
 async def setup_web_server():
     app = web.Application()
     app.router.add_route('GET', '/api/event-log',
                          event_source_handler.event_source_handler)
+    app.router.add_route('GET', '/api/domain-lists', domain_list_handler)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, port=get_config().api_port)
