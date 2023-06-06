@@ -1,14 +1,21 @@
-import {LogEvent, ResolveEvent} from "../model/Events";
+import {ResolveEvent} from "../model/Events";
 import {ListChildComponentProps} from "react-window";
-import {ListItem, Tooltip} from "@mui/material";
+import {Link, ListItem, Tooltip} from "@mui/material";
 import Grid from '@mui/material/Grid';
-import React from "react";
+import React, {useContext} from "react";
+import {
+    EventListAction,
+    EventListActionType,
+    EventListContext,
+    EventListDispatchContext
+} from "../model/EventListContext";
 
 export function ResolveEventItem(props: ListChildComponentProps) {
     const {index, style} = props;
-    const data = props.data as { events: LogEvent[], domainLists: string[] };
-    const event = data.events[index] as ResolveEvent;
-    const domainLists = data.domainLists;
+
+    const eventsState = useContext(EventListContext);
+    const eventDispatch = useContext(EventListDispatchContext);
+    const event = eventsState.filteredEvents[index] as ResolveEvent;
 
     return (
         <ListItem style={style} key={index} component="div">
@@ -21,9 +28,16 @@ export function ResolveEventItem(props: ListChildComponentProps) {
                     </Tooltip>
                 </Grid>
                 <Grid xs={3} item={true}>
-                    {event.remote}
+                    <Link component="button" onClick={() => {
+                        eventDispatch!({
+                            type: EventListActionType.setFilterClient,
+                            client: event.remote
+                        } as EventListAction);
+                    }}>
+                        {event.remote}
+                    </Link>
                 </Grid>
-                <Grid xs={3}>{event.domainList || '---'}</Grid>
+                <Grid xs={3} item={true}>{event.domainList || '---'}</Grid>
             </Grid>
         </ListItem>
     );

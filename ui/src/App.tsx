@@ -1,16 +1,26 @@
-import React, {useEffect, useReducer} from 'react';
+import React, {useContext, useEffect} from 'react';
 import './App.css';
 import {EventType, ResolveEvent} from "./model/Events";
 import {
     EventListAction,
     EventListActionType,
-    eventListReducer,
-    initialEventListState
-} from "./model/EventListReducer";
+    EventListDispatchContext,
+    EventListProvider
+} from "./model/EventListContext";
 import {EventList} from "./components/EventList";
 
 function App() {
-    const [eventsState, eventDispatch] = useReducer(eventListReducer, initialEventListState);
+    return (
+        <div className="App">
+            <EventListProvider>
+                <AppInner/>
+            </EventListProvider>
+        </div>
+    );
+}
+
+function AppInner() {
+    const eventDispatch = useContext(EventListDispatchContext);
 
     useEffect(() => {
         const logEventSource = new EventSource('/api/event-log');
@@ -24,7 +34,7 @@ function App() {
                     ips: logEntry.ips,
                     domainList: logEntry.domain_list,
                 } as ResolveEvent;
-                eventDispatch({
+                eventDispatch!({
                     type: EventListActionType.addResolveEvent,
                     event
                 } as EventListAction);
@@ -34,11 +44,10 @@ function App() {
         };
 
         return () => logEventSource.close();
-    }, []);
+    }, [eventDispatch]);
+
     return (
-        <div className="App">
-            <EventList events={eventsState.events}/>
-        </div>
+        <EventList/>
     );
 }
 
