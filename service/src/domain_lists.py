@@ -4,8 +4,8 @@ import aiohttp
 
 from config import ExternalDomainList, get_config, DomainList
 from domain_matchers import DomainMatcher, SerializableDomainMatcher
-from scheduled import scheduled
 from logger import logger
+from scheduled import scheduled
 
 lists: dict[DomainList, DomainMatcher] = {}
 
@@ -64,3 +64,12 @@ def init_manual_domain_lists() -> list[
 def match_domain(domain: str) -> Optional[DomainList]:
     return next((list_config for list_config, matcher in lists.items()
                  if matcher.match(domain)), None)
+
+
+def get_manual_domain_lists() -> dict[str, DomainList]:
+    return {list_config.name: list_config for list_config in
+            get_config().manual_domain_lists}
+
+
+def get_domain_matcher(list_config: DomainList) -> DomainMatcher:
+    return lists[list_config]

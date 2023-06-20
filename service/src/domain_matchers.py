@@ -26,6 +26,15 @@ class DomainMatcher:
             return
         self._prefixes.insert(p, domain)
 
+    def remove(self, domain: str):
+        domain = domain[::-1]
+        p = bisect_left(self._prefixes, domain)
+        if p < len(self._prefixes) and self._prefixes[p] == domain:
+            self._prefixes.pop(p)
+
+    def get_all(self):
+        return sorted(s[::-1] for s in self._prefixes)
+
 
 class SerializableDomainMatcher(DomainMatcher):
     _file_name: str

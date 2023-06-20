@@ -3,11 +3,15 @@ import {useEffect, useState} from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import {EditDomainListDialog} from "./EditDomainListDialog";
 
 export function DomainListSettingsButton() {
     const [domainLists, setDomainLists] = useState<string[]>([]);
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    const [selectedList, setSelectedList] = useState<string>('');
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+    const [openDialog, setOpenDialog] = useState(false);
+
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
@@ -19,7 +23,7 @@ export function DomainListSettingsButton() {
         fetch('/api/domain-lists')
             .then(response => response.json())
             .then(list => setDomainLists(list));
-    });
+    }, []);
 
     return (<>
         <Button
@@ -43,10 +47,17 @@ export function DomainListSettingsButton() {
             {
                 domainLists.map((domainList) => {
                     return <MenuItem key={domainList}
-                                     onClick={handleClose}>{domainList}
+                                     onClick={() => {
+                                         setOpenDialog(true);
+                                         setSelectedList(domainList);
+                                         handleClose();
+                                     }}>{domainList}
                     </MenuItem>;
                 })
             }
         </Menu>
+        <EditDomainListDialog domainList={selectedList}
+                              open={openDialog}
+                              onClose={() => setOpenDialog(false)}/>
     </>);
 }
