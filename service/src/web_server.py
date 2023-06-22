@@ -63,7 +63,7 @@ async def add_domain_handler(request: Request):
     domain_list_name = request.match_info['domain_list']
     domain_matcher = get_matcher_by_name(domain_list_name)
     data = await request.json()
-    domain_matcher.add(data['domain'])
+    await domain_matcher.add(data['domain'])
     return web.json_response('ok')
 
 
@@ -71,7 +71,7 @@ async def delete_domain_handler(request: Request):
     domain_list_name = request.match_info['domain_list']
     domain_matcher = get_matcher_by_name(domain_list_name)
     data = await request.json()
-    domain_matcher.remove(data['domain'])
+    await domain_matcher.remove(data['domain'])
     return web.json_response('ok')
 
 

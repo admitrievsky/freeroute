@@ -49,10 +49,7 @@ async def async_main():
     proxy_task = await start()
     tasks.add(proxy_task)
 
-    manual_domain_list_tasks = init_manual_domain_lists()
-    for task in manual_domain_list_tasks:
-        tasks.add(
-            asyncio.create_task(task()))
+    await init_manual_domain_lists()
 
     external_domain_list_tasks = init_external_domain_lists()
     for task in external_domain_list_tasks:

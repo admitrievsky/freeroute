@@ -17,7 +17,7 @@ def init_external_domain_lists() -> list[
         async with aiohttp.ClientSession() as session:
             async with session.get(list_config.url) as resp:
                 assert resp.status == 200
-                matcher.update((await resp.text()).splitlines())
+                await matcher.update((await resp.text()).splitlines())
                 logger.info(f'Updated list {list_config.name}')
 
     def init() -> list[Callable[[], Coroutine[Any, Any, Optional[Any]]]]:
@@ -37,28 +37,16 @@ def init_external_domain_lists() -> list[
     return init()
 
 
-def init_manual_domain_lists() -> list[
-    Callable[[], Coroutine[Any, Any, Optional[Any]]]]:
-    result = []
+async def init_manual_domain_lists():
     for list_config in get_config().manual_domain_lists:
         matcher = SerializableDomainMatcher(f'list_{list_config.name}.txt')
         try:
             logger.info(f'Loading manual list {list_config.name}')
-            matcher.load()
+            await matcher.load()
         except FileNotFoundError as e:
             logger.info(f'File {e.filename} not found, creating new one')
             matcher.dump_empty()
         lists[list_config] = matcher
-
-        @scheduled(get_config().manual_domain_list_save_interval_sec)
-        async def task():
-            if matcher.is_dirty():
-                logger.info(f'Saving list {list_config.name}')
-                await matcher.dump()
-
-        result.append(task)
-
-    return result
 
 
 def match_domain(domain: str) -> Optional[DomainList]:
