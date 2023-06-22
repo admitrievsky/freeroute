@@ -35,7 +35,6 @@ export function EditDomainListDialog(
 
     const [list, setList] = useState<string[]>([]);
     const [lastDeletedDomain, setLastDeletedDomain] = useState<string>('');
-    const [addDomainText, setAddDomainText] = useState<string>('');
 
     useEffect(() => {
         if (!domainList || !open) return;
@@ -106,17 +105,9 @@ export function EditDomainListDialog(
                     </Typography>
                 </Toolbar>
             </AppBar>
-            <Grid container spacing={2}>
-                <Grid item xs={8}>
-                    <TextField label="Add domain" variant="outlined" fullWidth
-                               onChange={e => setAddDomainText(e.target.value.trim())}/>
-                </Grid>
-                <Grid item alignItems="stretch" style={{display: "flex"}}>
-                    <Button variant="contained"
-                            onClick={() => addDomain(addDomainText)}
-                            disabled={!addDomainText || list.includes(addDomainText)}>Add</Button>
-                </Grid>
-            </Grid>
+
+            <AddDomainComponent domainList={list} onAdd={addDomain}/>
+
             <List>{
                 list.map((domain) => {
                     return (
@@ -144,4 +135,27 @@ export function EditDomainListDialog(
             action={undeleteAction}
         />
     </>);
+}
+
+function AddDomainComponent({domainList, onAdd}: {
+    domainList: string[],
+    onAdd: (domain: string) => void
+}) {
+    const [addDomainText, setAddDomainText] = useState<string>('');
+
+    return <Grid container spacing={2}>
+        <Grid item xs={8}>
+            <TextField label="Add domain" variant="outlined" fullWidth
+                       value={addDomainText}
+                       onChange={e => setAddDomainText(e.target.value.trim())}/>
+        </Grid>
+        <Grid item alignItems="stretch" style={{display: "flex"}}>
+            <Button variant="contained"
+                    onClick={() => {
+                        onAdd(addDomainText);
+                        setAddDomainText('');
+                    }}
+                    disabled={!addDomainText || domainList.includes(addDomainText)}>Add</Button>
+        </Grid>
+    </Grid>
 }
