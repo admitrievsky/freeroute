@@ -3,22 +3,18 @@ import signal
 
 from aiodnsresolver import IPv4AddressExpiresAt
 
-from config import get_config
 from dns_proxy import (
     DnsProxy
 )
 from domain_lists import init_external_domain_lists, match_domain, \
     init_manual_domain_lists
+from domain_router import route_domain
 from event_logger import event_logger
-from ip_route import add_route, sync_ip_route_cache, del_route
-from logger import init_logging, logger
+from ip_route import sync_ip_route_cache
+from logger import init_logging
 from web_server import setup_web_server, event_source_handler
 
 init_logging()
-
-iface_name_to_config = {
-    config.name: config for config in get_config().networking.tunnels
-}
 
 
 async def on_resolve(addr: str, domain: str, ips: list[IPv4AddressExpiresAt]):
@@ -27,19 +23,7 @@ async def on_resolve(addr: str, domain: str, ips: list[IPv4AddressExpiresAt]):
 
     event_logger.log_resolve_event(addr[0], domain, ips_str,
                                    domain_list.name if domain_list else None)
-
-    if domain_list is not None:
-        if domain_list.name == 'force_default':
-            logger.debug(f'Forcing default route to %s for %s', ips_str, domain)
-            await del_route(ips_str)
-            return
-
-        iface_config = iface_name_to_config[domain_list.interface]
-        logger.debug(f'Adding route to %s via %s for %s', ips_str,
-                     iface_config.name, domain)
-        await add_route(iface_config, ips_str)
-    else:
-        logger.debug(f'No route for %s. Doing nothing', domain)
+    await route_domain(domain_list, domain, ips_str)
 
 
 async def async_main():

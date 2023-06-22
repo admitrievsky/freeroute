@@ -7,6 +7,7 @@ from aiohttp_sse import sse_response
 from config import get_config
 from domain_lists import get_manual_domain_lists, get_domain_matcher
 from domain_matchers import DomainMatcher
+from domain_router import re_route_domain
 from event_logger import event_logger
 from logger import logger
 
@@ -64,6 +65,7 @@ async def add_domain_handler(request: Request):
     domain_matcher = get_matcher_by_name(domain_list_name)
     data = await request.json()
     await domain_matcher.add(data['domain'])
+    await re_route_domain(data['domain'])
     return web.json_response('ok')
 
 
@@ -72,6 +74,7 @@ async def delete_domain_handler(request: Request):
     domain_matcher = get_matcher_by_name(domain_list_name)
     data = await request.json()
     await domain_matcher.remove(data['domain'])
+    await re_route_domain(data['domain'])
     return web.json_response('ok')
 
 
