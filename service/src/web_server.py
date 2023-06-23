@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from aiohttp import web
 from aiohttp.web_request import Request
@@ -90,6 +91,10 @@ async def setup_web_server():
                          add_domain_handler)
     app.router.add_route('DELETE', '/api/domain-lists/{domain_list}',
                          delete_domain_handler)
+    for try_static in ['static', '../ui/build']:
+        if os.path.isdir(try_static):
+            app.router.add_static('/', try_static, follow_symlinks=True)
+            break
 
     runner = web.AppRunner(app)
     await runner.setup()
