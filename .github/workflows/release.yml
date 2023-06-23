@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "20.x"
+
+      - name: Build
+        id: build
+        run: |
+          cd ui
+          npm install
+          npm run build
+          cd ..
+          mkdir -p freeroute/service/static
+          cp -rv ui/build/* freeroute/service/static
+          cp service/poetry.lock freeroute/service
+          cp service/pyproject.toml freeroute/service
+          cp service/src/* freeroute/service
+          tar -czvf freeroute.tar.gz freeroute
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.ref }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: freeroute.tar.gz
