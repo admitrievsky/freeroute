@@ -2,5 +2,5 @@
 .venv
 .vagrant
 Vagrantfile
-service/config.yaml
-service/list_*.txt
+config.yaml
+list_*.txt
