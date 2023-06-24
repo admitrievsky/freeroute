@@ -17,13 +17,8 @@ class InterfaceConfig(BaseModel):
 
 
 class NetworkingConfig(BaseModel):
-    ignore_interfaces: list[str] = ['lo']
-
-    default_gateway: InterfaceConfig = InterfaceConfig(name='eth0',
-                                                       gateway_ip='192.168.1.1')
     tunnels: list[InterfaceConfig] = [InterfaceConfig(name='tun0',
                                                       gateway_ip='1.2.3.4')]
-
     dns_port: int = 5553
 
 
