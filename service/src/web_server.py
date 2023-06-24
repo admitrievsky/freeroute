@@ -91,7 +91,7 @@ async def setup_web_server():
                          add_domain_handler)
     app.router.add_route('DELETE', '/api/domain-lists/{domain_list}',
                          delete_domain_handler)
-    for try_static in ['service/static', '../ui/build']:
+    for try_static in ['service/static', 'ui/build']:
         if os.path.isdir(try_static):
             app.router.add_static('/', try_static, follow_symlinks=True)
             break
