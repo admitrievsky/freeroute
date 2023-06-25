@@ -28,6 +28,7 @@ jobs:
           cp service/poetry.lock freeroute/service
           cp service/pyproject.toml freeroute/service
           cp service/src/* freeroute/service
+          cp install.sh freeroute
           tar -czvf freeroute.tar.gz freeroute
 
       - name: Create Release
