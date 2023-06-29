@@ -89,7 +89,7 @@ export function EditDomainListDialog(
             onClose={onClose}
             TransitionComponent={Transition}
         >
-            <AppBar sx={{position: 'relative'}}>
+            <AppBar sx={{position: 'relative', marginBottom: 1}}>
                 <Toolbar>
                     <IconButton
                         edge="start"

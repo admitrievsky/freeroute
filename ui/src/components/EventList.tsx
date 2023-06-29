@@ -1,9 +1,16 @@
 import {ResolveEventItem} from "./ResolveEventItem";
 import {FixedSizeList} from 'react-window';
 import Box from '@mui/material/Box';
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useRef, useState} from "react";
 import Grid from "@mui/material/Grid";
-import {FormControl, InputLabel, MenuItem, Select, Stack} from "@mui/material";
+import {
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack
+} from "@mui/material";
 import {
     EventListAction,
     EventListActionType,
@@ -17,11 +24,12 @@ export function EventList() {
     const {filteredEvents} = eventsState;
     const [width, setWidth] = useState(0);
     const [height, setHeight] = useState(0);
+    const listRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleResize = () => {
             setWidth(Math.min(800, window.innerWidth));
-            setHeight(window.innerHeight - 60);
+            setHeight(window.innerHeight - (listRef.current?.offsetTop || 0));
         }
         window.addEventListener('resize', handleResize);
         handleResize();
@@ -39,19 +47,22 @@ export function EventList() {
                     bgcolor: 'background.paper'
                 }}
             >
-                <Stack spacing={2} direction="row">
+                <Stack spacing={2} direction="row" justifyContent="flex-end"
+                       mb={3}>
                     <DomainListSettingsButton/>
                 </Stack>
                 <ListHeader></ListHeader>
-                <FixedSizeList
-                    height={height}
-                    width={width}
-                    itemSize={50}
-                    itemCount={filteredEvents.length}
-                    overscanCount={5}
-                >
-                    {ResolveEventItem}
-                </FixedSizeList>
+                <div ref={listRef}>
+                    <FixedSizeList
+                        height={height}
+                        width={width}
+                        itemSize={50}
+                        itemCount={filteredEvents.length}
+                        overscanCount={5}
+                    >
+                        {ResolveEventItem}
+                    </FixedSizeList>
+                </div>
             </Box>
         </>
     );
@@ -65,7 +76,7 @@ function ListHeader() {
     return (
         <Grid container>
             <Grid xs={6} item={true}>
-                Domain
+                <Paper className="grid-header-paper">Domain</Paper>
             </Grid>
             <Grid xs={3} item={true}>
                 <FormControl sx={{m: 1, minWidth: 120}} size="small">
@@ -84,7 +95,8 @@ function ListHeader() {
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid xs={3} item={true}>Domain list</Grid>
+            <Grid xs={3} item={true}><Paper className="grid-header-paper">Domain
+                list</Paper></Grid>
         </Grid>
     );
 }
