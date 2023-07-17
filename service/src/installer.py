@@ -170,6 +170,11 @@ def generate_config(gateway_ip: str):
     name: antifilter
     update_interval_hours: 1
     url: https://antifilter.download/list/domains.lst
+manual_domain_lists:
+- interface: force_default
+  name: force_default
+- interface: tun0
+  name: vpn
 networking:
   dns_port: 5553
   tunnels:
