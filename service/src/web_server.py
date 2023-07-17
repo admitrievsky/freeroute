@@ -93,6 +93,8 @@ async def setup_web_server():
                          delete_domain_handler)
     for try_static in ['service/static', 'ui/build']:
         if os.path.isdir(try_static):
+            app.router.add_route('GET', '/', lambda _: web.FileResponse(
+                os.path.join(try_static, 'index.html')))
             app.router.add_static('/', try_static, follow_symlinks=True)
             break
 
