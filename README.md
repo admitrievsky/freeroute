@@ -56,5 +56,5 @@ Usage
 -----
 Configure your local machines to use your machine with Freeroute as a DNS server and gateway.
 
-Visit `http://<freeroute-host>:8080/index.html` to see the web interface.
+Visit `http://<freeroute-host>:8080` to see the web interface.
 
