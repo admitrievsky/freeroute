@@ -98,7 +98,7 @@ def DnsProxy(
         try:
             while True:
                 logger.info('Waiting for next request')
-                request_data, addr = await recvfrom(loop, [sock], 512)
+                request_data, addr = (await recvfrom(loop, [(sock, None)], 512))[1]
                 request_logger = get_logger_adapter(
                     {'dnsrewriteproxy_requestid': ''.join(
                         choices(request_id_alphabet, k=8))})
