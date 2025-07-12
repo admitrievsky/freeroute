@@ -29,6 +29,7 @@ from aiodnsresolver import (
     pack,
     parse,
     recvfrom,
+    DnsNoMatchingAnswers,
 )
 
 from config import get_config
@@ -98,7 +99,7 @@ def DnsProxy(
         try:
             while True:
                 logger.info('Waiting for next request')
-                request_data, addr = await recvfrom(loop, [sock], 512)
+                request_data, addr = (await recvfrom(loop, [(sock, None)], 512))[1]
                 request_logger = get_logger_adapter(
                     {'dnsrewriteproxy_requestid': ''.join(
                         choices(request_id_alphabet, k=8))})
@@ -167,6 +168,9 @@ def DnsProxy(
             ip_addresses = await resolve(
                 name_str_lower, TYPES.A,
                 get_logger_adapter=get_resolver_logger_adapter(request_logger))
+        except DnsNoMatchingAnswers:
+            request_logger.info('No matching answers')
+            ip_addresses = ()
         except DnsRecordDoesNotExist:
             request_logger.info('Does not exist')
             return error(query, ERRORS.NXDOMAIN)
