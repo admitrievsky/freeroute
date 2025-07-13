@@ -172,5 +172,6 @@ async def request(domain: str, ip: IPv4Address, timeout: aiohttp.ClientTimeout) 
         logger.debug(f'Timeout for {domain}, {ip}')
         return True
     except Exception as e:
-        logger.debug(f'Error for {domain}, {ip}: {e}', exc_info=True)
+        logger.trace(f'Error for {domain}, {ip}: {e}', exc_info=True)
+        logger.debug(f'The host responds to {domain} with {ip}, it\'s not blocked, but there was an error: {e}, which could be normal')
     return False
