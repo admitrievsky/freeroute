@@ -56,7 +56,7 @@ async def init_dynamic_domain_lists():
         lists[list_config] = matcher
 
 
-async def match_domain(domain: str, ips: list[IPv4Address] | None) -> Optional[DomainList]:
+async def match_domain(domain: str, ips: Optional[list[IPv4Address]]) -> Optional[DomainList]:
     for list_config, matcher in lists.items():
         if await matcher.match(domain, ips):
             return list_config

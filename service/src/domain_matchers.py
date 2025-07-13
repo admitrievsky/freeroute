@@ -2,6 +2,7 @@ import asyncio
 import socket
 from bisect import bisect, bisect_left
 from ipaddress import IPv4Address
+from typing import Optional
 from weakref import WeakValueDictionary
 
 import aiofiles as aiofiles
@@ -21,7 +22,7 @@ class DomainMatcher:
     async def update(self, domain_suffixes):
         self._prefixes = sorted(s[::-1] for s in domain_suffixes)
 
-    async def match(self, domain: str, ips: list[IPv4Address] | None) -> bool:
+    async def match(self, domain: str, ips: Optional[list[IPv4Address]]) -> bool:
         domain = domain[::-1]
         p = bisect(self._prefixes, domain)
         if p == 0:
@@ -145,7 +146,7 @@ class DynamicDomainMatcher(DomainMatcher):
     def get_all(self):
         return []
 
-    async def request_and_cache(self, domain: str, ips: list[IPv4Address] | None):
+    async def request_and_cache(self, domain: str, ips: Optional[list[IPv4Address]]):
         if not ips:
             logger.debug(f'No IPs provided for domain {domain}, assuming not blocked')
             return False
