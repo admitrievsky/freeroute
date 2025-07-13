@@ -1,9 +1,10 @@
+from ipaddress import IPv4Address
 from typing import Coroutine, Optional, Any, Callable
 
 import aiohttp
 
 from config import ExternalDomainList, get_config, DomainList
-from domain_matchers import DomainMatcher, SerializableDomainMatcher
+from domain_matchers import DomainMatcher, SerializableDomainMatcher, DynamicDomainMatcher
 from logger import logger
 from scheduled import scheduled
 
@@ -49,9 +50,17 @@ async def init_manual_domain_lists():
         lists[list_config] = matcher
 
 
-def match_domain(domain: str) -> Optional[DomainList]:
-    return next((list_config for list_config, matcher in lists.items()
-                 if matcher.match(domain)), None)
+async def init_dynamic_domain_lists():
+    for list_config in get_config().dynamic_domain_lists:
+        matcher = DynamicDomainMatcher(timeout=list_config.timeout)
+        lists[list_config] = matcher
+
+
+async def match_domain(domain: str, ips: list[IPv4Address] | None) -> Optional[DomainList]:
+    for list_config, matcher in lists.items():
+        if await matcher.match(domain, ips):
+            return list_config
+    return None
 
 
 def get_manual_domain_lists() -> dict[str, DomainList]:

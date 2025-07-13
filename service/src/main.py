@@ -7,7 +7,7 @@ from dns_proxy import (
     DnsProxy
 )
 from domain_lists import init_external_domain_lists, match_domain, \
-    init_manual_domain_lists
+    init_manual_domain_lists, init_dynamic_domain_lists
 from domain_router import route_domain
 from event_logger import event_logger
 from ip_route import sync_ip_route_cache
@@ -18,7 +18,7 @@ init_logging()
 
 
 async def on_resolve(addr: str, domain: str, ips: list[IPv4AddressExpiresAt]):
-    domain_list = match_domain(domain)
+    domain_list = await match_domain(domain, ips)
     ips_str = [str(ip) for ip in ips]
 
     event_logger.log_resolve_event(addr[0], domain, ips_str,
@@ -39,6 +39,8 @@ async def async_main():
     for task in external_domain_list_tasks:
         tasks.add(
             asyncio.create_task(task()))
+
+    await init_dynamic_domain_lists()
 
     tasks.add(
         asyncio.create_task(sync_ip_route_cache()))

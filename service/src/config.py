@@ -38,6 +38,9 @@ class ExternalDomainList(DomainList):
     update_interval_hours: int
 
 
+class DynamicDomainList(DomainList):
+    timeout: float = 3
+
 class Config(BaseModel):
     networking: NetworkingConfig = NetworkingConfig()
     external_domain_lists: list[ExternalDomainList] = [
@@ -52,6 +55,7 @@ class Config(BaseModel):
         DomainList(name='force_default', interface='force_default'),
         DomainList(name='vpn', interface='tun0')
     ]
+    dynamic_domain_lists: list[DynamicDomainList] = []
     ip_route_command: str = 'sudo ip route'
     loggers: dict[str, str] = {'freeroute': 'INFO', 'dnsrewriteproxy': 'ERROR'}
     api_port: int = 8080

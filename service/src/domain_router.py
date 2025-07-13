@@ -42,7 +42,7 @@ async def re_route_domain(domain: str):
     ips = list(set(ips))
     if ips:
         logger.debug(f'Re-routing domain %s with ips %s', domain, ips)
-        domain_list = match_domain(domain)
+        domain_list = await match_domain(domain, None)
         await route_domain(domain_list, domain, ips)
     else:
         logger.debug(f'Domain %s was not routed before. Nothing to reroute',
