@@ -161,16 +161,23 @@ class DynamicDomainMatcher(DomainMatcher):
 
 
 async def request(domain: str, ip: IPv4Address, timeout: aiohttp.ClientTimeout) -> bool:
-    url = f'https://{domain}'
+    url = f'https://{domain}/'
     resolver = StaticResolver({domain: str(ip)})
     connector = aiohttp.TCPConnector(resolver=resolver)
+    responses = []
     try:
         async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
-            async with session.get(url) as response:
-                logger.debug(f'Response for {domain}, {ip}: {response.status}')
+            async def req():
+                async with session.head(url) as response:
+                    responses.append(response.status)
+
+            tasks = [asyncio.create_task(req()) for _ in range(50)]
+            await asyncio.gather(*tasks)
+            logger.debug(f'All is good for {domain}, {ip}, responses: {len(responses)}, {responses}')
     except asyncio.exceptions.TimeoutError:
-        logger.debug(f'Timeout for {domain}, {ip}')
+        logger.debug(f'Timeout for {domain}, {ip}, responses: {len(responses)}, {responses}')
         return True
     except Exception as e:
-        logger.debug(f'The host responds to {domain} with {ip}, it\'s not blocked, but there was an error: {e}, which could be normal')
+        logger.debug(f'Some error happened, but the domain could not be blocked: {e}, '
+                     f'responses: {len(responses)}, {responses}')
     return False
