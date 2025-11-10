@@ -17,8 +17,9 @@ def init_external_domain_lists() -> list[
         async with aiohttp.ClientSession() as session:
             async with session.get(list_config.url) as resp:
                 assert resp.status == 200
-                await matcher.update((await resp.text()).splitlines())
-                logger.info(f'Updated list {list_config.name}')
+                lines = (await resp.text()).splitlines()
+                await matcher.update(lines)
+                logger.info(f'Updated list {list_config.name}. Got {len(lines)} lines')
 
     def init() -> list[Callable[[], Coroutine[Any, Any, Optional[Any]]]]:
         result = []
@@ -27,7 +28,7 @@ def init_external_domain_lists() -> list[
             lists[list_config] = matcher
 
             @scheduled(list_config.update_interval_hours * 3600)
-            async def task():
+            async def task(list_config=list_config, matcher=matcher):
                 await update(list_config, matcher)
 
             result.append(task)
